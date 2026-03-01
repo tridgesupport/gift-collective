@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --cream: #F7F3EE;
+  --sand: #E8E0D5;
+  --warm-dark: #1C1814;
+  --gold: #B8974A;
+  --muted: #8C7E72;
+}
+
+body {
+  background-color: var(--cream);
+  color: var(--warm-dark);
+}
+
+img,
+video {
+  max-width: 100%;
+  height: auto;
+}
