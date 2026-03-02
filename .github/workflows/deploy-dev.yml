@@ -1,0 +1,30 @@
+name: Deploy Dev & Update Alias
+
+on:
+  push:
+    branches:
+      - dev
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Deploy to Vercel preview
+        id: deploy
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: team_6zZLnlOJSxZtjQHCk6xjtVmx
+          VERCEL_PROJECT_ID: prj_CBnZN2XFtoCfrHIzU8jNHsJ9sh33
+        run: |
+          DEPLOY_URL=$(npx vercel --token "$VERCEL_TOKEN" --yes 2>&1 | grep -o 'https://[^ ]*\.vercel\.app' | tail -1)
+          echo "Deployed to: $DEPLOY_URL"
+          echo "url=$DEPLOY_URL" >> $GITHUB_OUTPUT
+
+      - name: Point gift-collective-dev.vercel.app to latest deployment
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx vercel alias "${{ steps.deploy.outputs.url }}" gift-collective-dev.vercel.app --token "$VERCEL_TOKEN" --yes
+          echo "✓ gift-collective-dev.vercel.app now points to ${{ steps.deploy.outputs.url }}"
