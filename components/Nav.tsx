@@ -7,6 +7,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Nav({ navTree }: { navTree: NavNode[] }) {
     const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
+    const [hoveredChildSlug, setHoveredChildSlug] = useState<string | null>(null);
 
     return (
         <header className="hidden md:block fixed top-0 w-full z-50 bg-cream/95 backdrop-blur-sm border-b border-sand text-[10px] tracking-[0.15em] uppercase font-semibold h-20 shadow-sm">
@@ -20,24 +21,22 @@ export default function Nav({ navTree }: { navTree: NavNode[] }) {
                 {/* Center: Dynamic Links */}
                 <nav className="flex items-center space-x-12 h-full absolute left-1/2 -translate-x-1/2">
                     {navTree.map((node) => {
-                        // Link target: first child's path if node has children, else node's own path
                         const href = node.children.length > 0
                             ? `/${node.children[0].path}`
                             : `/${node.path}`;
-                        const dropdownItems = node.children;
 
                         return (
                             <div
                                 key={node.slug}
                                 className="h-full flex items-center relative"
-                                onMouseEnter={() => setHoveredSlug(node.slug)}
-                                onMouseLeave={() => setHoveredSlug(null)}
+                                onMouseEnter={() => { setHoveredSlug(node.slug); setHoveredChildSlug(null); }}
+                                onMouseLeave={() => { setHoveredSlug(null); setHoveredChildSlug(null); }}
                             >
                                 <Link href={href} className="hover:text-gold transition-colors py-5 text-warm-dark">
                                     {node.name}
                                 </Link>
                                 <AnimatePresence>
-                                    {hoveredSlug === node.slug && dropdownItems.length > 0 && (
+                                    {hoveredSlug === node.slug && node.children.length > 0 && (
                                         <motion.div
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
@@ -45,10 +44,36 @@ export default function Nav({ navTree }: { navTree: NavNode[] }) {
                                             className="absolute top-20 left-1/2 -translate-x-1/2 bg-cream border border-sand p-6 min-w-48 shadow-lg"
                                         >
                                             <div className="flex flex-col space-y-5 text-center">
-                                                {dropdownItems.map(child => (
-                                                    <Link key={child.slug} href={`/${child.path}`} className="hover:text-gold transition-colors whitespace-nowrap text-warm-dark">
-                                                        {child.name}
-                                                    </Link>
+                                                {node.children.map(child => (
+                                                    <div
+                                                        key={child.slug}
+                                                        className="relative"
+                                                        onMouseEnter={() => setHoveredChildSlug(child.slug)}
+                                                        onMouseLeave={() => setHoveredChildSlug(null)}
+                                                    >
+                                                        <Link
+                                                            href={`/${child.path}`}
+                                                            className="hover:text-gold transition-colors whitespace-nowrap text-warm-dark flex items-center justify-center gap-1"
+                                                        >
+                                                            {child.name}
+                                                            {child.children.length > 0 && <span className="opacity-50">›</span>}
+                                                        </Link>
+                                                        {hoveredChildSlug === child.slug && child.children.length > 0 && (
+                                                            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-cream border border-sand p-6 min-w-40 shadow-lg">
+                                                                <div className="flex flex-col space-y-5 text-center">
+                                                                    {child.children.map(grandchild => (
+                                                                        <Link
+                                                                            key={grandchild.slug}
+                                                                            href={`/${grandchild.path}`}
+                                                                            className="hover:text-gold transition-colors whitespace-nowrap text-warm-dark"
+                                                                        >
+                                                                            {grandchild.name}
+                                                                        </Link>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
                                                 ))}
                                             </div>
                                         </motion.div>

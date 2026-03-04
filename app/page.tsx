@@ -1,6 +1,11 @@
 import Link from 'next/link';
+import { getSheetData } from '@/lib/sheet';
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const siteData = await getSheetData();
+  const firstNode = siteData.navTree[0];
+  const enterHref = firstNode ? `/${firstNode.path}` : '/';
+
   return (
     <main className="relative z-10 flex min-h-screen w-full flex-col items-center justify-between py-12 px-6 lg:px-20 bg-cream text-warm-dark">
 
@@ -28,7 +33,7 @@ export default function LandingPage() {
 
         <div className="w-full max-w-md">
           <Link
-            href="/curated-collections/"
+            href={enterHref}
             className="block w-full bg-warm-dark text-white hover:bg-gold hover:text-white px-12 py-5 rounded-lg font-bold text-xs tracking-[0.4em] uppercase transition-all duration-300 shadow-2xl text-center"
           >
             Enter the Collective
