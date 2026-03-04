@@ -1,12 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { MenuSection } from '@/lib/types';
+import { NavNode } from '@/lib/types';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function Nav({ menuSections }: { menuSections: MenuSection[] }) {
-    const [hoveredSection, setHoveredSection] = useState<string | null>(null);
+export default function Nav({ navTree }: { navTree: NavNode[] }) {
+    const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
 
     return (
         <header className="hidden md:block fixed top-0 w-full z-50 bg-cream/95 backdrop-blur-sm border-b border-sand text-[10px] tracking-[0.15em] uppercase font-semibold h-20 shadow-sm">
@@ -19,36 +19,44 @@ export default function Nav({ menuSections }: { menuSections: MenuSection[] }) {
 
                 {/* Center: Dynamic Links */}
                 <nav className="flex items-center space-x-12 h-full absolute left-1/2 -translate-x-1/2">
-                    {menuSections.map((section) => (
-                        <div
-                            key={section.slug}
-                            className="h-full flex items-center relative"
-                            onMouseEnter={() => setHoveredSection(section.slug)}
-                            onMouseLeave={() => setHoveredSection(null)}
-                        >
-                            <Link href={`/${section.slug}/${section.collections[0]?.slug || ''}`} className="hover:text-gold transition-colors py-5 text-warm-dark">
-                                {section.name}
-                            </Link>
-                            <AnimatePresence>
-                                {hoveredSection === section.slug && section.collections.length > 0 && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10 }}
-                                        animate={{ opacity: 1, y: 0 }}
-                                        exit={{ opacity: 0, y: 10 }}
-                                        className="absolute top-20 left-1/2 -translate-x-1/2 bg-cream border border-sand p-6 min-w-48 shadow-lg"
-                                    >
-                                        <div className="flex flex-col space-y-5 text-center">
-                                            {section.collections.map(col => (
-                                                <Link key={col.slug} href={`/${section.slug}/${col.slug}`} className="hover:text-gold transition-colors whitespace-nowrap text-warm-dark">
-                                                    {col.name}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
-                        </div>
-                    ))}
+                    {navTree.map((node) => {
+                        // Link target: first child's path if node has children, else node's own path
+                        const href = node.children.length > 0
+                            ? `/${node.children[0].path}`
+                            : `/${node.path}`;
+                        const dropdownItems = node.children;
+
+                        return (
+                            <div
+                                key={node.slug}
+                                className="h-full flex items-center relative"
+                                onMouseEnter={() => setHoveredSlug(node.slug)}
+                                onMouseLeave={() => setHoveredSlug(null)}
+                            >
+                                <Link href={href} className="hover:text-gold transition-colors py-5 text-warm-dark">
+                                    {node.name}
+                                </Link>
+                                <AnimatePresence>
+                                    {hoveredSlug === node.slug && dropdownItems.length > 0 && (
+                                        <motion.div
+                                            initial={{ opacity: 0, y: 10 }}
+                                            animate={{ opacity: 1, y: 0 }}
+                                            exit={{ opacity: 0, y: 10 }}
+                                            className="absolute top-20 left-1/2 -translate-x-1/2 bg-cream border border-sand p-6 min-w-48 shadow-lg"
+                                        >
+                                            <div className="flex flex-col space-y-5 text-center">
+                                                {dropdownItems.map(child => (
+                                                    <Link key={child.slug} href={`/${child.path}`} className="hover:text-gold transition-colors whitespace-nowrap text-warm-dark">
+                                                        {child.name}
+                                                    </Link>
+                                                ))}
+                                            </div>
+                                        </motion.div>
+                                    )}
+                                </AnimatePresence>
+                            </div>
+                        );
+                    })}
                     {/* Static placeholders matching design */}
                     <Link href="#" className="hover:text-gold transition-colors py-5 text-warm-dark">BESPOKE</Link>
                     <Link href="#" className="hover:text-gold transition-colors py-5 text-warm-dark">ABOUT</Link>

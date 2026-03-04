@@ -1,6 +1,6 @@
 import Papa from 'papaparse';
 import { slugify } from './slugify';
-import { Asset, Product, Collection, MenuSection, SiteData } from './types';
+import { Asset, Product, NavNode, SiteData } from './types';
 
 function formatUrl(url: string): string {
     if (!url) return '';
@@ -48,52 +48,22 @@ export async function getSheetData(): Promise<SiteData> {
         skipEmptyLines: true,
     });
 
-    const menuSectionsMap = new Map<string, MenuSection>();
-    let homepage: Collection | null = null;
+    const navTree: NavNode[] = [];
+    let homepage: NavNode | null = null;
 
     for (const row of data) {
-        const menuSectionName = (row.menu_section || '').trim();
-        const collectionName = (row.collection_name || '').trim();
+        const levels = ['level_1', 'level_2', 'level_3', 'level_4', 'level_5']
+            .map(k => (row[k] || '').trim())
+            .filter(Boolean);
+
         const productName = (row.product_name || '').trim();
 
-        if (!menuSectionName || !collectionName || !productName) {
-            console.warn('Skipping row due to missing section, collection, or product name', row);
+        if (levels.length === 0 || !productName) {
+            console.warn('Skipping row due to missing level or product name', row);
             continue;
         }
 
-        const menuSectionSlug = slugify(menuSectionName);
-        const collectionSlug = slugify(collectionName);
-        const productSlug = slugify(productName);
-
-        if (!menuSectionsMap.has(menuSectionSlug)) {
-            menuSectionsMap.set(menuSectionSlug, {
-                name: menuSectionName,
-                slug: menuSectionSlug,
-                collections: []
-            });
-        }
-
-        const section = menuSectionsMap.get(menuSectionSlug)!;
-        let collection = section.collections.find(c => c.slug === collectionSlug);
-
-        if (!collection) {
-            const isHomepage = row.is_homepage?.toString().trim().toLowerCase() === 'true';
-            collection = {
-                name: collectionName,
-                slug: collectionSlug,
-                description: row.collection_description?.trim() || '',
-                editorialUrl: formatUrl(row.collection_editorial_url?.trim() || ''),
-                editorialType: row.collection_editorial_type?.trim().toLowerCase() === 'video' ? 'video' : 'image',
-                isHomepage,
-                products: []
-            };
-            section.collections.push(collection);
-
-            if (isHomepage && !homepage) {
-                homepage = collection;
-            }
-        }
-
+        // Build product
         const assets: Asset[] = [];
         for (let i = 1; i <= 4; i++) {
             const urlRaw = row[`asset_${i}_url`];
@@ -101,9 +71,7 @@ export async function getSheetData(): Promise<SiteData> {
                 const url = formatUrl(urlRaw.trim());
                 const typeRaw = row[`asset_${i}_type`];
                 const type = typeRaw?.trim().toLowerCase() === 'video' ? 'video' : 'image';
-                if (url) {
-                    assets.push({ url, type });
-                }
+                if (url) assets.push({ url, type });
             }
         }
 
@@ -113,25 +81,71 @@ export async function getSheetData(): Promise<SiteData> {
 
         const product: Product = {
             name: productName,
-            slug: productSlug,
-            description: row.product_description?.trim() || '',
+            slug: slugify(productName),
+            brand: (row.brand || '').trim(),
+            description: (row.product_description || '').trim(),
             price: row.price ? parseFloat(row.price) : undefined,
             priceVisible,
             minOrderQty,
-            assets
+            assets,
         };
 
-        collection.products.push(product);
+        // Walk/create tree following the level hierarchy
+        let currentChildren = navTree;
+        let currentPath = '';
+
+        for (let i = 0; i < levels.length; i++) {
+            const levelName = levels[i];
+            const slug = slugify(levelName);
+            currentPath = currentPath ? `${currentPath}/${slug}` : slug;
+
+            let node = currentChildren.find(n => n.slug === slug);
+            if (!node) {
+                node = {
+                    name: levelName,
+                    slug,
+                    path: currentPath,
+                    description: '',
+                    editorialUrl: '',
+                    editorialType: 'image',
+                    isHomepage: false,
+                    children: [],
+                    products: [],
+                };
+                currentChildren.push(node);
+            }
+
+            if (i === levels.length - 1) {
+                // Deepest level: apply editorial metadata (first row wins) and add product
+                if (!node.editorialUrl) {
+                    node.description = (row.collection_description || '').trim();
+                    node.editorialUrl = formatUrl((row.collection_editorial_url || '').trim());
+                    node.editorialType = row.collection_editorial_type?.trim().toLowerCase() === 'video' ? 'video' : 'image';
+                }
+                const isHomepage = row.is_homepage?.toString().trim().toLowerCase() === 'true';
+                if (isHomepage) {
+                    node.isHomepage = true;
+                    if (!homepage) homepage = node;
+                }
+                node.products.push(product);
+            } else {
+                currentChildren = node.children;
+            }
+        }
     }
 
-    const siteData: SiteData = {
-        menuSections: Array.from(menuSectionsMap.values()),
-        homepage
-    };
-
-    if (!siteData.homepage && siteData.menuSections.length > 0 && siteData.menuSections[0].collections.length > 0) {
-        siteData.homepage = siteData.menuSections[0].collections[0];
+    // Fallback: use first leaf node with products as homepage
+    if (!homepage && navTree.length > 0) {
+        const findFirstLeaf = (nodes: NavNode[]): NavNode | null => {
+            for (const node of nodes) {
+                if (node.products.length > 0) return node;
+                const leaf = findFirstLeaf(node.children);
+                if (leaf) return leaf;
+            }
+            return null;
+        };
+        homepage = findFirstLeaf(navTree);
     }
 
-    return siteData;
+    return { navTree, homepage };
 }
