@@ -2,12 +2,33 @@
 
 import Link from 'next/link';
 import { NavNode } from '@/lib/types';
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 export default function Nav({ navTree }: { navTree: NavNode[] }) {
     const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
     const [hoveredChildSlug, setHoveredChildSlug] = useState<string | null>(null);
+
+    const closeTopTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const closeChildTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+    const openTop = (slug: string) => {
+        if (closeTopTimer.current) clearTimeout(closeTopTimer.current);
+        setHoveredSlug(slug);
+    };
+    const closeTop = () => {
+        closeTopTimer.current = setTimeout(() => {
+            setHoveredSlug(null);
+            setHoveredChildSlug(null);
+        }, 150);
+    };
+    const openChild = (slug: string) => {
+        if (closeChildTimer.current) clearTimeout(closeChildTimer.current);
+        setHoveredChildSlug(slug);
+    };
+    const closeChild = () => {
+        closeChildTimer.current = setTimeout(() => setHoveredChildSlug(null), 150);
+    };
 
     return (
         <header className="hidden md:block fixed top-0 w-full z-50 bg-cream/95 backdrop-blur-sm border-b border-sand text-[10px] tracking-[0.15em] uppercase font-semibold h-20 shadow-sm">
@@ -29,8 +50,8 @@ export default function Nav({ navTree }: { navTree: NavNode[] }) {
                             <div
                                 key={node.slug}
                                 className="h-full flex items-center relative"
-                                onMouseEnter={() => { setHoveredSlug(node.slug); setHoveredChildSlug(null); }}
-                                onMouseLeave={() => { setHoveredSlug(null); setHoveredChildSlug(null); }}
+                                onMouseEnter={() => openTop(node.slug)}
+                                onMouseLeave={closeTop}
                             >
                                 <Link href={href} className="hover:text-gold transition-colors py-5 text-warm-dark">
                                     {node.name}
@@ -41,6 +62,7 @@ export default function Nav({ navTree }: { navTree: NavNode[] }) {
                                             initial={{ opacity: 0, y: 10 }}
                                             animate={{ opacity: 1, y: 0 }}
                                             exit={{ opacity: 0, y: 10 }}
+                                            onMouseEnter={() => { if (closeTopTimer.current) clearTimeout(closeTopTimer.current); }}
                                             className="absolute top-20 left-1/2 -translate-x-1/2 bg-cream border border-sand p-6 min-w-48 shadow-lg"
                                         >
                                             <div className="flex flex-col space-y-5 text-center">
@@ -48,8 +70,8 @@ export default function Nav({ navTree }: { navTree: NavNode[] }) {
                                                     <div
                                                         key={child.slug}
                                                         className="relative"
-                                                        onMouseEnter={() => setHoveredChildSlug(child.slug)}
-                                                        onMouseLeave={() => setHoveredChildSlug(null)}
+                                                        onMouseEnter={() => openChild(child.slug)}
+                                                        onMouseLeave={closeChild}
                                                     >
                                                         <Link
                                                             href={`/${child.path}`}
@@ -59,7 +81,10 @@ export default function Nav({ navTree }: { navTree: NavNode[] }) {
                                                             {child.children.length > 0 && <span className="opacity-50">›</span>}
                                                         </Link>
                                                         {hoveredChildSlug === child.slug && child.children.length > 0 && (
-                                                            <div className="absolute left-full top-1/2 -translate-y-1/2 ml-3 bg-cream border border-sand p-6 min-w-40 shadow-lg">
+                                                            <div
+                                                                className="absolute left-full top-1/2 -translate-y-1/2 bg-cream border border-sand p-6 min-w-40 shadow-lg"
+                                                                onMouseEnter={() => { if (closeChildTimer.current) clearTimeout(closeChildTimer.current); }}
+                                                            >
                                                                 <div className="flex flex-col space-y-5 text-center">
                                                                     {child.children.map(grandchild => (
                                                                         <Link
