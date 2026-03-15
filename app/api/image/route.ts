@@ -33,10 +33,15 @@ export async function GET(request: NextRequest) {
         return new NextResponse('Remote server returned an error', { status: response.status });
     }
 
+    const contentType = response.headers.get('content-type') || 'application/octet-stream';
+    const isVideo = contentType.startsWith('video/');
+
     const responseHeaders: Record<string, string> = {
         // Cache aggressively — Vercel CDN serves subsequent requests from the edge
         'Cache-Control': 'public, max-age=86400, s-maxage=86400, stale-while-revalidate=3600',
-        'Content-Type': response.headers.get('content-type') || 'application/octet-stream',
+        'Content-Type': contentType,
+        // Required for browsers to seek/stream video — must be present on the proxy response
+        'Accept-Ranges': response.headers.get('accept-ranges') || (isVideo ? 'bytes' : 'none'),
     };
 
     const contentLength = response.headers.get('content-length');
