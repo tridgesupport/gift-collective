@@ -1,16 +1,22 @@
 'use client';
 
 import Link from 'next/link';
-import { MenuSection } from '../lib/types';
+import { NavNode } from '../lib/types';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 
-export default function NavMobile({ menuSections }: { menuSections: MenuSection[] }) {
+export default function NavMobile({ navTree }: { navTree: NavNode[] }) {
     const [isOpen, setIsOpen] = useState(false);
-    const [expandedSection, setExpandedSection] = useState<string | null>(null);
+    const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
+    const [expandedChildSlug, setExpandedChildSlug] = useState<string | null>(null);
 
     const toggleSection = (slug: string) => {
-        setExpandedSection(prev => prev === slug ? null : slug);
+        setExpandedSlug(prev => prev === slug ? null : slug);
+        setExpandedChildSlug(null);
+    };
+
+    const toggleChild = (slug: string) => {
+        setExpandedChildSlug(prev => prev === slug ? null : slug);
     };
 
     return (
@@ -34,32 +40,66 @@ export default function NavMobile({ menuSections }: { menuSections: MenuSection[
                         className="md:hidden fixed inset-0 z-40 bg-cream pt-20 px-6 pb-6 overflow-y-auto"
                     >
                         <div className="flex flex-col space-y-6 mt-8">
-                            {menuSections.map((section) => (
-                                <div key={section.slug} className="border-b border-sand pb-4">
+                            {navTree.map((node) => (
+                                <div key={node.slug} className="border-b border-sand pb-4">
                                     <button
-                                        onClick={() => toggleSection(section.slug)}
+                                        onClick={() => toggleSection(node.slug)}
                                         className="w-full text-left flex justify-between items-center text-lg uppercase tracking-widest font-medium text-warm-dark"
                                     >
-                                        {section.name}
-                                        <span>{expandedSection === section.slug ? '−' : '+'}</span>
+                                        {node.name}
+                                        <span>{expandedSlug === node.slug ? '−' : '+'}</span>
                                     </button>
                                     <AnimatePresence>
-                                        {expandedSection === section.slug && (
+                                        {expandedSlug === node.slug && node.children.length > 0 && (
                                             <motion.div
                                                 initial={{ height: 0, opacity: 0 }}
                                                 animate={{ height: 'auto', opacity: 1 }}
                                                 exit={{ height: 0, opacity: 0 }}
                                                 className="overflow-hidden flex flex-col space-y-4 mt-4"
                                             >
-                                                {section.collections.map(col => (
-                                                    <Link
-                                                        key={col.slug}
-                                                        href={`/${section.slug}/${col.slug}`}
-                                                        className="text-muted hover:text-gold uppercase tracking-widest text-sm"
-                                                        onClick={() => setIsOpen(false)}
-                                                    >
-                                                        {col.name}
-                                                    </Link>
+                                                {node.children.map(child => (
+                                                    <div key={child.slug}>
+                                                        {child.children.length > 0 ? (
+                                                            <>
+                                                                <button
+                                                                    onClick={() => toggleChild(child.slug)}
+                                                                    className="w-full text-left flex justify-between items-center text-muted uppercase tracking-widest text-sm"
+                                                                >
+                                                                    {child.name}
+                                                                    <span className="text-xs">{expandedChildSlug === child.slug ? '−' : '+'}</span>
+                                                                </button>
+                                                                <AnimatePresence>
+                                                                    {expandedChildSlug === child.slug && (
+                                                                        <motion.div
+                                                                            initial={{ height: 0, opacity: 0 }}
+                                                                            animate={{ height: 'auto', opacity: 1 }}
+                                                                            exit={{ height: 0, opacity: 0 }}
+                                                                            className="overflow-hidden flex flex-col space-y-3 mt-3 pl-4"
+                                                                        >
+                                                                            {child.children.map(grandchild => (
+                                                                                <Link
+                                                                                    key={grandchild.slug}
+                                                                                    href={`/${grandchild.path}`}
+                                                                                    className="text-muted/70 hover:text-gold uppercase tracking-widest text-xs"
+                                                                                    onClick={() => setIsOpen(false)}
+                                                                                >
+                                                                                    {grandchild.name}
+                                                                                </Link>
+                                                                            ))}
+                                                                        </motion.div>
+                                                                    )}
+                                                                </AnimatePresence>
+                                                            </>
+                                                        ) : (
+                                                            <Link
+                                                                href={`/${child.path}`}
+                                                                className="text-muted hover:text-gold uppercase tracking-widest text-sm"
+                                                                onClick={() => setIsOpen(false)}
+                                                            >
+                                                                {child.name}
+                                                            </Link>
+                                                        )}
+                                                    </div>
                                                 ))}
                                             </motion.div>
                                         )}

@@ -12,8 +12,8 @@ export default async function PublicLayout({
 
     return (
         <div className="min-h-screen flex flex-col bg-cream">
-            <Nav menuSections={siteData.menuSections} />
-            <NavMobile menuSections={siteData.menuSections} />
+            <Nav navTree={siteData.navTree} />
+            <NavMobile navTree={siteData.navTree} />
             {process.env.NEXT_PUBLIC_IS_PREVIEW === 'true' && <PublishButton />}
             <main className="flex-1 mt-16 md:mt-20">
                 {children}

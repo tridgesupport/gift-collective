@@ -26,5 +26,5 @@ jobs:
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
         run: |
-          npx vercel alias "${{ steps.deploy.outputs.url }}" gift-collective-dev.vercel.app --token "$VERCEL_TOKEN" --yes
+          npx vercel alias "${{ steps.deploy.outputs.url }}" gift-collective-dev.vercel.app --token "$VERCEL_TOKEN"
           echo "✓ gift-collective-dev.vercel.app now points to ${{ steps.deploy.outputs.url }}"

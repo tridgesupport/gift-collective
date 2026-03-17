@@ -6,6 +6,7 @@ export type Asset = {
 export type Product = {
   name: string
   slug: string
+  brand: string
   description: string
   price?: number
   priceVisible: boolean
@@ -13,23 +14,19 @@ export type Product = {
   assets: Asset[]
 }
 
-export type Collection = {
+export type NavNode = {
   name: string
   slug: string
+  path: string              // full URL path e.g. "curated/christmas/hermes"
   description: string
   editorialUrl: string
   editorialType: 'image' | 'video'
   isHomepage: boolean
+  children: NavNode[]
   products: Product[]
 }
 
-export type MenuSection = {
-  name: string
-  slug: string
-  collections: Collection[]
-}
-
 export type SiteData = {
-  menuSections: MenuSection[]
-  homepage: Collection | null
+  navTree: NavNode[]
+  homepage: NavNode | null
 }

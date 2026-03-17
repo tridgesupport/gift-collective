@@ -17,6 +17,9 @@ export default function ProductFrame({ product, collectionName, menuSection, bas
             </Link>
 
             <div className="text-center w-full flex flex-col items-center">
+                {product.brand && (
+                    <p className="text-[9px] uppercase tracking-widest text-muted mb-1">{product.brand}</p>
+                )}
                 <h3 className="font-cormorant text-2xl md:text-3xl font-semibold text-warm-dark mb-1">{product.name}</h3>
                 <p className="text-muted text-[10px] md:text-xs uppercase tracking-[0.2em] mb-6">
                     {product.description}
