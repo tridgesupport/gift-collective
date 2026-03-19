@@ -18,7 +18,7 @@ export default function PaginatedFrames({
 }) {
     const [page, setPage] = useState(0);
     const [direction, setDirection] = useState(1);
-    const itemsPerPage = 2;
+    const itemsPerPage = 4;
     const totalPages = Math.ceil(products.length / itemsPerPage);
 
     const slideVariants = {
@@ -48,7 +48,7 @@ export default function PaginatedFrames({
                         animate="center"
                         exit="exit"
                         transition={{ type: 'tween', duration: 0.5, ease: 'easeOut' }}
-                        className={`grid gap-8 lg:gap-14 ${currentProducts.length === 1 ? 'grid-cols-1 md:w-1/2 mx-auto' : 'grid-cols-1 md:grid-cols-2'}`}
+                        className={`grid gap-8 lg:gap-14 ${currentProducts.length === 1 ? 'grid-cols-1 md:w-1/4 mx-auto' : 'grid-cols-2 md:grid-cols-4'}`}
                     >
                         {currentProducts.map((p, idx) => (
                             <ProductFrame
