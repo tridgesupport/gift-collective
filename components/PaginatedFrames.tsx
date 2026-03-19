@@ -38,7 +38,7 @@ export default function PaginatedFrames({
 
     return (
         <div className="w-full flex flex-col pt-8">
-            <div className="relative overflow-hidden w-full min-h-[500px] mb-8">
+            <div className="relative overflow-hidden w-full max-w-4xl mx-auto min-h-[500px] mb-8">
                 <AnimatePresence initial={false} custom={direction} mode="wait">
                     <motion.div
                         key={page}
