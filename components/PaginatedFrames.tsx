@@ -48,7 +48,7 @@ export default function PaginatedFrames({
                         animate="center"
                         exit="exit"
                         transition={{ type: 'tween', duration: 0.5, ease: 'easeOut' }}
-                        className={`grid gap-8 lg:gap-14 ${currentProducts.length === 1 ? 'grid-cols-1 md:w-1/2 mx-auto' : 'grid-cols-2'}`}
+                        className={`grid gap-8 lg:gap-14 ${currentProducts.length === 1 ? 'grid-cols-1 md:w-1/2 mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}
                     >
                         {currentProducts.map((p, idx) => (
                             <ProductFrame
