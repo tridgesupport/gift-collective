@@ -3,7 +3,7 @@ import { NavNode } from '@/lib/types';
 import EditorialBanner from '@/components/EditorialBanner';
 import PaginatedFrames from '@/components/PaginatedFrames';
 import ProductGallery from '@/components/ProductGallery';
-import InquiryButton from '@/components/InquiryButton';
+import ProductActions from '@/components/ProductActions';
 import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 
@@ -121,11 +121,12 @@ export default async function CatchAllPage(props: { params: Promise<{ slug: stri
                                 )}
 
                                 <div className="flex justify-center mt-12">
-                                    <InquiryButton
+                                    <ProductActions
                                         product={product}
                                         collectionName={parentNode.name}
                                         menuSection={ancestors[0]?.name || slug[0]}
-                                        variant="primary"
+                                        collectionPath={parentNode.path}
+                                        variant="detail"
                                     />
                                 </div>
                             </div>

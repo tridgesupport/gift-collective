@@ -2,6 +2,7 @@ import { getSheetData } from '@/lib/sheet';
 import Nav from '@/components/Nav';
 import NavMobile from '@/components/NavMobile';
 import PublishButton from '@/components/PublishButton';
+import CartWishlistProvider from '@/components/CartWishlistProvider';
 
 export default async function PublicLayout({
     children,
@@ -11,6 +12,7 @@ export default async function PublicLayout({
     const siteData = await getSheetData();
 
     return (
+        <CartWishlistProvider>
         <div className="min-h-screen flex flex-col bg-cream">
             <Nav navTree={siteData.navTree} />
             <NavMobile navTree={siteData.navTree} />
@@ -29,5 +31,6 @@ export default async function PublicLayout({
                 </div>
             </footer>
         </div>
+        </CartWishlistProvider>
     );
 }

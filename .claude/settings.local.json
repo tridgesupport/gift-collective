@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(npm run:*)",
-      "Bash(open:*)"
+      "Bash(open:*)",
+      "Bash(openssl rand:*)",
+      "Bash(cd \"/Users/hardik.parikh/Documents/Tridge Business/the gift collective/the-gift-collective-2026-spreadsheet/the-gift-collective-2026\" && npm install @auth/upstash-redis-adapter @upstash/redis resend 2>&1 | tail -5)",
+      "Bash(cd \"/Users/hardik.parikh/Documents/Tridge Business/the gift collective/the-gift-collective-2026-spreadsheet/the-gift-collective-2026\" && npm install next-auth@beta 2>&1 | tail -5)"
     ]
   }
 }
