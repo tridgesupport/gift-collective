@@ -1,7 +1,7 @@
 'use client';
 
 import { Product } from '../lib/types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductFrame from './ProductFrame';
 
@@ -18,6 +18,9 @@ export default function PaginatedFrames({
 }) {
     const [page, setPage] = useState(0);
     const [direction, setDirection] = useState(1);
+
+    // Reset to first page whenever the product list changes (e.g. filters applied)
+    useEffect(() => { setPage(0); }, [products]);
     const itemsPerPage = 4;
     const totalPages = Math.ceil(products.length / itemsPerPage);
 
