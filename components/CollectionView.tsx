@@ -6,7 +6,7 @@ import FilterBar, { Filters, PriceRange } from './FilterBar';
 import PaginatedFrames from './PaginatedFrames';
 
 function matchesPrice(price: number | undefined, range: PriceRange): boolean {
-    if (price === undefined) return true; // no price set — always show
+    if (price === undefined) return true;
     switch (range) {
         case '0-2500': return price <= 2500;
         case '2500-5000': return price > 2500 && price <= 5000;
@@ -27,7 +27,7 @@ export default function CollectionView({
     menuSection: string;
     baseUrl: string;
 }) {
-    const [filters, setFilters] = useState<Filters>({ brands: [], priceRange: null });
+    const [filters, setFilters] = useState<Filters>({ brands: [], priceRanges: [] });
 
     const availableBrands = useMemo(() => {
         const brands = products.map(p => p.brand).filter(Boolean);
@@ -37,21 +37,17 @@ export default function CollectionView({
     const filteredProducts = useMemo(() => {
         return products.filter(p => {
             if (filters.brands.length > 0 && !filters.brands.includes(p.brand)) return false;
-            if (filters.priceRange && !matchesPrice(p.price, filters.priceRange)) return false;
+            if (filters.priceRanges.length > 0 && !filters.priceRanges.some(r => matchesPrice(p.price, r))) return false;
             return true;
         });
     }, [products, filters]);
-
-    const handleFilterChange = (next: Filters) => {
-        setFilters(next);
-    };
 
     return (
         <>
             <FilterBar
                 availableBrands={availableBrands}
                 filters={filters}
-                onChange={handleFilterChange}
+                onChange={setFilters}
                 totalCount={products.length}
                 filteredCount={filteredProducts.length}
             />
