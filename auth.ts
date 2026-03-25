@@ -12,7 +12,8 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
     adapter: UpstashRedisAdapter(redis),
     providers: [
         Resend({
-            from: 'The Gift Collective <noreply@resend.dev>',
+            apiKey: process.env.RESEND_API_KEY,
+            from: 'The Gift Collective <onboarding@resend.dev>',
         }),
     ],
     session: { strategy: 'jwt' },
