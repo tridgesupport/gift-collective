@@ -76,6 +76,7 @@ export async function getSheetData(): Promise<SiteData> {
         }
 
         const priceVisible = row.price_visible?.toString().trim().toLowerCase() === 'true';
+        const soldOut = row.sold_out?.toString().trim().toLowerCase() === 'yes';
         let minOrderQty = parseInt(row.min_order_qty?.toString().trim() || '20', 10);
         if (isNaN(minOrderQty)) minOrderQty = 20;
 
@@ -86,6 +87,7 @@ export async function getSheetData(): Promise<SiteData> {
             description: (row.product_description || '').trim(),
             price: row.price ? parseFloat(row.price) : undefined,
             priceVisible,
+            soldOut,
             minOrderQty,
             assets,
         };

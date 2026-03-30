@@ -10,6 +10,7 @@ export type Product = {
   description: string
   price?: number
   priceVisible: boolean
+  soldOut: boolean
   minOrderQty: number
   assets: Asset[]
 }

@@ -94,7 +94,7 @@ export default function ProductActions({
         <>
             <div className={`flex items-center gap-2 ${variant === 'detail' ? 'justify-center flex-wrap' : 'justify-center'}`}>
                 {/* Cart / Sold Out */}
-                {product.priceVisible ? (
+                {!product.soldOut ? (
                     <button
                         onClick={handleCart}
                         disabled={isPending}
