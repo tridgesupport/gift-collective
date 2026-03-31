@@ -1,9 +1,9 @@
 import { getSheetData } from '@/lib/sheet';
 import { NavNode } from '@/lib/types';
 import EditorialBanner from '@/components/EditorialBanner';
-import PaginatedFrames from '@/components/PaginatedFrames';
+import CollectionView from '@/components/CollectionView';
 import ProductGallery from '@/components/ProductGallery';
-import InquiryButton from '@/components/InquiryButton';
+import ProductActions from '@/components/ProductActions';
 import Link from 'next/link';
 import { redirect, notFound } from 'next/navigation';
 
@@ -71,7 +71,7 @@ export default async function CatchAllPage(props: { params: Promise<{ slug: stri
             <div>
                 <EditorialBanner node={node} />
                 <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
-                    <PaginatedFrames
+                    <CollectionView
                         products={node.products}
                         collectionName={node.name}
                         menuSection={topLevelNode?.name || slug[0]}
@@ -121,11 +121,12 @@ export default async function CatchAllPage(props: { params: Promise<{ slug: stri
                                 )}
 
                                 <div className="flex justify-center mt-12">
-                                    <InquiryButton
+                                    <ProductActions
                                         product={product}
                                         collectionName={parentNode.name}
                                         menuSection={ancestors[0]?.name || slug[0]}
-                                        variant="primary"
+                                        collectionPath={parentNode.path}
+                                        variant="detail"
                                     />
                                 </div>
                             </div>

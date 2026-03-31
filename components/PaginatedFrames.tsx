@@ -1,7 +1,7 @@
 'use client';
 
 import { Product } from '../lib/types';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ProductFrame from './ProductFrame';
 
@@ -18,7 +18,10 @@ export default function PaginatedFrames({
 }) {
     const [page, setPage] = useState(0);
     const [direction, setDirection] = useState(1);
-    const itemsPerPage = 2;
+
+    // Reset to first page whenever the product list changes (e.g. filters applied)
+    useEffect(() => { setPage(0); }, [products]);
+    const itemsPerPage = 4;
     const totalPages = Math.ceil(products.length / itemsPerPage);
 
     const slideVariants = {
@@ -38,7 +41,7 @@ export default function PaginatedFrames({
 
     return (
         <div className="w-full flex flex-col pt-8">
-            <div className="relative overflow-hidden w-full min-h-[500px] mb-8">
+            <div className="relative overflow-hidden w-full max-w-4xl mx-auto min-h-[500px] mb-8">
                 <AnimatePresence initial={false} custom={direction} mode="wait">
                     <motion.div
                         key={page}
@@ -48,7 +51,7 @@ export default function PaginatedFrames({
                         animate="center"
                         exit="exit"
                         transition={{ type: 'tween', duration: 0.5, ease: 'easeOut' }}
-                        className={`grid gap-8 lg:gap-14 ${currentProducts.length === 1 ? 'grid-cols-1 md:w-1/2 mx-auto' : 'grid-cols-1 md:grid-cols-2'}`}
+                        className={`grid gap-8 lg:gap-14 ${currentProducts.length === 1 ? 'grid-cols-1 md:w-1/2 mx-auto' : 'grid-cols-1 sm:grid-cols-2'}`}
                     >
                         {currentProducts.map((p, idx) => (
                             <ProductFrame

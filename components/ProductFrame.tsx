@@ -2,10 +2,10 @@
 
 import { Product } from '../lib/types';
 import ProductGallery from './ProductGallery';
-import InquiryButton from './InquiryButton';
+import ProductActions from './ProductActions';
 import Link from 'next/link';
 
-export default function ProductFrame({ product, collectionName, menuSection, baseUrl, priority = false }: { product: Product, collectionName: string, menuSection: string, baseUrl: string, priority?: boolean }) {
+export default function ProductFrame({ product, collectionName, menuSection, baseUrl, priority = false }: { product: Product, collectionName: string, menuSection: string, baseUrl: string, priority?: boolean, collectionPath?: string }) {
     return (
         <div className="w-full flex flex-col items-center group">
             <Link href={`${baseUrl}/${product.slug}`} className="block w-full cursor-pointer mb-8 group">
@@ -27,11 +27,12 @@ export default function ProductFrame({ product, collectionName, menuSection, bas
                 {product.priceVisible && product.price && (
                     <p className="text-sm font-medium tracking-wide mb-6">₹{product.price.toLocaleString('en-IN')}</p>
                 )}
-                <InquiryButton
+                <ProductActions
                     product={product}
                     collectionName={collectionName}
                     menuSection={menuSection}
-                    variant="secondary"
+                    collectionPath={baseUrl.replace(/^\//, '')}
+                    variant="card"
                 />
             </div>
         </div>

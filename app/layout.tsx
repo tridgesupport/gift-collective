@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import { Cormorant_Garamond, Jost } from 'next/font/google';
 import './globals.css';
 import { Toaster } from 'react-hot-toast';
+import SessionProviderWrapper from '@/components/SessionProviderWrapper';
 
 const cormorantGaramond = Cormorant_Garamond({
   weight: ['300', '500', '600', '700'],  // 400 (normal) is never used explicitly
@@ -30,8 +31,10 @@ export default function RootLayout({
   return (
     <html lang="en" className={`${cormorantGaramond.variable} ${jost.variable}`}>
       <body className="font-jost bg-[--cream] text-[--warm-dark] antialiased">
-        {children}
-        <Toaster position="bottom-center" />
+        <SessionProviderWrapper>
+          {children}
+          <Toaster position="bottom-center" />
+        </SessionProviderWrapper>
       </body>
     </html>
   );
