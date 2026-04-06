@@ -75,6 +75,9 @@ export async function getSheetData(): Promise<SiteData> {
             }
         }
 
+        const showProduct = row.show_product?.toString().trim().toLowerCase();
+        if (showProduct === 'no') continue;
+
         const priceVisible = row.price_visible?.toString().trim().toLowerCase() === 'true';
         const soldOut = row.sold_out?.toString().trim().toLowerCase() === 'yes';
         let minOrderQty = parseInt(row.min_order_qty?.toString().trim() || '20', 10);
