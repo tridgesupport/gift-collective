@@ -31,3 +31,13 @@ export type SiteData = {
   navTree: NavNode[]
   homepage: NavNode | null
 }
+
+export type SearchableProduct = {
+  name: string
+  slug: string
+  brand: string
+  description: string
+  imageUrl: string
+  productUrl: string
+  collectionName: string
+}

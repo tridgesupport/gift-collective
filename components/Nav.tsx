@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { NavNode } from '@/lib/types';
+import { NavNode, SearchableProduct } from '@/lib/types';
 import { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import UserNav from './UserNav';
+import SearchOverlay from './SearchOverlay';
 
-export default function Nav({ navTree }: { navTree: NavNode[] }) {
+export default function Nav({ navTree, allProducts }: { navTree: NavNode[]; allProducts: SearchableProduct[] }) {
+    const [searchOpen, setSearchOpen] = useState(false);
     const [hoveredSlug, setHoveredSlug] = useState<string | null>(null);
     const [hoveredChildSlug, setHoveredChildSlug] = useState<string | null>(null);
 
@@ -32,6 +34,7 @@ export default function Nav({ navTree }: { navTree: NavNode[] }) {
     };
 
     return (
+        <>
         <header className="hidden md:block fixed top-0 w-full z-50 bg-cream/95 backdrop-blur-sm border-b border-sand text-[10px] tracking-[0.15em] uppercase font-semibold h-20 shadow-sm">
             <div className="max-w-[1600px] mx-auto px-8 h-full flex items-center justify-between">
 
@@ -113,12 +116,24 @@ export default function Nav({ navTree }: { navTree: NavNode[] }) {
                     <Link href="#" className="hover:text-gold transition-colors py-5 text-warm-dark">ABOUT</Link>
                 </nav>
 
-                {/* Right: User Nav (cart, wishlist, sign in) */}
-                <div className="shrink-0">
+                {/* Right: Search + User Nav */}
+                <div className="shrink-0 flex items-center gap-4">
+                    <button
+                        onClick={() => setSearchOpen(true)}
+                        className="text-warm-dark hover:text-gold transition-colors"
+                        title="Search"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </button>
                     <UserNav />
                 </div>
 
             </div>
         </header>
+
+        <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} allProducts={allProducts} />
+        </>
     );
 }

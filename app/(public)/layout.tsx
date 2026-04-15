@@ -3,6 +3,27 @@ import Nav from '@/components/Nav';
 import NavMobile from '@/components/NavMobile';
 import PublishButton from '@/components/PublishButton';
 import CartWishlistProvider from '@/components/CartWishlistProvider';
+import { NavNode, SearchableProduct } from '@/lib/types';
+
+function flattenProducts(nodes: NavNode[], menuSection = ''): SearchableProduct[] {
+    const results: SearchableProduct[] = [];
+    for (const node of nodes) {
+        const section = menuSection || node.name;
+        for (const p of node.products) {
+            results.push({
+                name: p.name,
+                slug: p.slug,
+                brand: p.brand,
+                description: p.description,
+                imageUrl: p.assets[0]?.url || '',
+                productUrl: `/${node.path}/${p.slug}`,
+                collectionName: node.name,
+            });
+        }
+        results.push(...flattenProducts(node.children, section));
+    }
+    return results;
+}
 
 export default async function PublicLayout({
     children,
@@ -10,12 +31,13 @@ export default async function PublicLayout({
     children: React.ReactNode;
 }) {
     const siteData = await getSheetData();
+    const allProducts = flattenProducts(siteData.navTree);
 
     return (
         <CartWishlistProvider>
         <div className="min-h-screen flex flex-col bg-cream">
-            <Nav navTree={siteData.navTree} />
-            <NavMobile navTree={siteData.navTree} />
+            <Nav navTree={siteData.navTree} allProducts={allProducts} />
+            <NavMobile navTree={siteData.navTree} allProducts={allProducts} />
             {process.env.NEXT_PUBLIC_IS_PREVIEW === 'true' && <PublishButton />}
             <main className="flex-1 mt-16 md:mt-20">
                 {children}

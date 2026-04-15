@@ -1,12 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { NavNode } from '../lib/types';
+import { NavNode, SearchableProduct } from '../lib/types';
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import SearchOverlay from './SearchOverlay';
 
-export default function NavMobile({ navTree }: { navTree: NavNode[] }) {
+export default function NavMobile({ navTree, allProducts }: { navTree: NavNode[]; allProducts: SearchableProduct[] }) {
     const [isOpen, setIsOpen] = useState(false);
+    const [searchOpen, setSearchOpen] = useState(false);
     const [expandedSlug, setExpandedSlug] = useState<string | null>(null);
     const [expandedChildSlug, setExpandedChildSlug] = useState<string | null>(null);
 
@@ -25,10 +27,23 @@ export default function NavMobile({ navTree }: { navTree: NavNode[] }) {
                 <Link href="/" className="font-cormorant text-2xl tracking-normal normal-case font-bold" onClick={() => setIsOpen(false)}>
                     The Gift Collective
                 </Link>
-                <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-warm-dark uppercase text-xs tracking-widest font-medium">
-                    {isOpen ? 'Close' : 'Menu'}
-                </button>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => { setSearchOpen(true); setIsOpen(false); }}
+                        className="p-2 text-warm-dark"
+                        title="Search"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z" />
+                        </svg>
+                    </button>
+                    <button onClick={() => setIsOpen(!isOpen)} className="p-2 text-warm-dark uppercase text-xs tracking-widest font-medium">
+                        {isOpen ? 'Close' : 'Menu'}
+                    </button>
+                </div>
             </header>
+
+            <SearchOverlay isOpen={searchOpen} onClose={() => setSearchOpen(false)} allProducts={allProducts} />
 
             <AnimatePresence>
                 {isOpen && (
