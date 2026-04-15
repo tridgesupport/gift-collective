@@ -51,6 +51,11 @@ export async function getSheetData(): Promise<SiteData> {
     const navTree: NavNode[] = [];
     let homepage: NavNode | null = null;
 
+    // DEBUG: log all column headers from first row
+    if (data.length > 0) {
+        console.log('[sheet] CSV column keys:', Object.keys(data[0]));
+    }
+
     for (const row of data) {
         const levels = ['level_1', 'level_2', 'level_3', 'level_4', 'level_5']
             .map(k => (row[k] || '').trim())
@@ -76,6 +81,9 @@ export async function getSheetData(): Promise<SiteData> {
         }
 
         const showProduct = row.show_product?.toString().trim().toLowerCase();
+        if ((row.product_name || '').toString().includes('Sprinkle')) {
+            console.log('[sheet] Sprinkle row show_product raw:', JSON.stringify(row.show_product), '→ parsed:', showProduct);
+        }
         if (showProduct === 'no') continue;
 
         const priceVisible = row.price_visible?.toString().trim().toLowerCase() === 'true';
