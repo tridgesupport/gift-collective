@@ -29,38 +29,39 @@ export async function getSheetData(): Promise<SiteData> {
             .map(k => (row[k] || '').trim())
             .filter(Boolean);
 
-        const productName = (row.title || '').trim();
+        const productName = (row.product_name || '').trim();
 
         if (levels.length === 0 || !productName) {
             continue;
         }
 
-        if (row.show_product === false) continue;
+        // show_product: API returns boolean or string 'no'
+        const showProduct = row.show_product;
+        if (showProduct === false || showProduct?.toString().trim().toLowerCase() === 'no') continue;
 
-        // assets is a JSON-encoded string
-        let assets: Asset[] = [];
-        try {
-            const parsed = typeof row.assets === 'string' ? JSON.parse(row.assets) : (row.assets || []);
-            assets = (parsed as { url: string; type: string }[]).map(a => ({
-                url: formatUrl(a.url),
-                type: a.type === 'video' ? 'video' : 'image',
-            }));
-        } catch {
-            // malformed assets — no images for this product
+        // Assets: separate columns (same as original sheet structure)
+        const assets: Asset[] = [];
+        for (let i = 1; i <= 4; i++) {
+            const urlRaw = row[`asset_${i}_url`];
+            if (urlRaw) {
+                const url = formatUrl(urlRaw.trim());
+                const typeRaw = row[`asset_${i}_type`];
+                const type = typeRaw?.trim().toLowerCase() === 'video' ? 'video' : 'image';
+                if (url) assets.push({ url, type });
+            }
         }
 
-        const priceVisible = row.price_visible === true;
-        const soldOut = row.sold_out === true;
-        let minOrderQty = typeof row.min_order_qty === 'number'
-            ? row.min_order_qty
-            : parseInt(row.min_order_qty?.toString() || '20', 10);
+        // Booleans: API may return true/false or 'true'/'false'
+        const priceVisible = row.price_visible === true || row.price_visible?.toString().trim().toLowerCase() === 'true';
+        const soldOut = row.sold_out === true || row.sold_out?.toString().trim().toLowerCase() === 'yes';
+        let minOrderQty = parseInt(row.min_order_qty?.toString().trim() || '20', 10);
         if (isNaN(minOrderQty)) minOrderQty = 20;
 
         const product: Product = {
             name: productName,
             slug: slugify(productName),
-            brand: (row.vendor_brand_name || '').trim(),
-            description: (row.description || '').trim(),
+            brand: (row.brand || '').trim(),
+            description: (row.product_description || '').trim(),
             price: row.price ? parseFloat(row.price) : undefined,
             priceVisible,
             soldOut,
@@ -99,7 +100,8 @@ export async function getSheetData(): Promise<SiteData> {
                     node.editorialUrl = formatUrl((row.collection_editorial_url || '').trim());
                     node.editorialType = row.collection_editorial_type?.trim().toLowerCase() === 'video' ? 'video' : 'image';
                 }
-                if (row.is_homepage === true) {
+                const isHomepage = row.is_homepage === true || row.is_homepage?.toString().trim().toLowerCase() === 'true';
+                if (isHomepage) {
                     node.isHomepage = true;
                     if (!homepage) homepage = node;
                 }
